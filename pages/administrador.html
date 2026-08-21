@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de administración · SENAEnglish</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="board-body">
+
+  <main class="board-wrap admin-wrap">
+    <header class="board-header">
+      <span class="topbar-eyebrow">SENAEnglish · Evaluación de inglés</span>
+      <h1>Panel de administración</h1>
+      <p id="connected-count" class="board-sub">— participantes conectados</p>
+      <button type="button" class="action-btn action-color" id="btn-reiniciar">Reiniciar evaluación</button>
+    </header>
+
+    <div class="admin-grid">
+      <section class="sidebar-panel admin-section admin-section-wide">
+        <div class="minimap-heading"><span>Participantes</span><span id="players-total">0</span></div>
+        <div class="admin-table-scroll">
+          <table class="admin-table">
+            <thead><tr><th>Color</th><th>Nombre</th><th>Progreso</th><th>Aciertos</th><th>Desaciertos</th><th>Score</th><th>Estado</th></tr></thead>
+            <tbody id="tabla-participantes"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="sidebar-panel admin-section admin-section-wide">
+        <div class="minimap-heading"><span>Ranking · hasta 20</span></div>
+        <table class="ranking-table" id="ranking-table">
+          <thead><tr><th>Pos.</th><th>Usuario</th><th></th><th>Aciertos</th><th>Score</th></tr></thead>
+          <tbody id="ranking-body"></tbody>
+        </table>
+      </section>
+    </div>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="../assets/js/senaenglish-client.js"></script>
+  <script>
+    const tablaParticipantes = document.getElementById("tabla-participantes");
+    const rankingBody = document.getElementById("ranking-body");
+    const connectedCount = document.getElementById("connected-count");
+    const playersTotal = document.getElementById("players-total");
+    let paletaPorId = {};
+
+    function colorHex(colorId) { return paletaPorId[colorId] || "#999"; }
+
+    function renderParticipantes(participantes) {
+      const conectados = participantes.filter((p) => p.conectado);
+      connectedCount.textContent = `${conectados.length} participante${conectados.length === 1 ? "" : "s"} conectado${conectados.length === 1 ? "" : "s"}`;
+      playersTotal.textContent = participantes.length;
+      tablaParticipantes.innerHTML = "";
+      participantes.forEach((p) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><span class="color-dot" style="background:${colorHex(p.color)}"></span></td>
+          <td>${p.nombre}</td>
+          <td>${p.finalizado ? "Finalizado" : `${p.preguntaActual} / ${p.totalPreguntas}`}</td>
+          <td>${p.aciertos}</td><td>${p.desaciertos}</td><td>${p.score}</td>
+          <td>${p.conectado ? "Conectado" : "Desconectado"}</td>`;
+        tablaParticipantes.appendChild(tr);
+      });
+    }
+
+    function renderRanking(ranking) {
+      rankingBody.innerHTML = "";
+      if (!ranking.length) {
+        rankingBody.innerHTML = '<tr><td colspan="5" class="lobby-empty">Todavía no hay resultados finalizados.</td></tr>';
+        return;
+      }
+      ranking.forEach((p, i) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${i + 1}</td><td>${p.nombre}</td>
+          <td><span class="color-dot" style="background:${colorHex(p.color)}"></span></td>
+          <td>${p.aciertos}</td><td>${p.score}</td>`;
+        rankingBody.appendChild(tr);
+      });
+    }
+
+    function aplicarEstado(estado) {
+      estado.config.paleta.forEach((c) => { paletaPorId[c.id] = c.hex; });
+      renderParticipantes(estado.participantes);
+      renderRanking(estado.ranking);
+    }
+
+    SENAEnglish.observar().then(aplicarEstado);
+    SENAEnglish.socket.on("jugador_nuevo", () => SENAEnglish.observar().then(aplicarEstado));
+    SENAEnglish.socket.on("jugador_reconectado", () => SENAEnglish.observar().then(aplicarEstado));
+    SENAEnglish.socket.on("jugador_desconectado", () => SENAEnglish.observar().then(aplicarEstado));
+    SENAEnglish.socket.on("jugador_actualizado", () => SENAEnglish.observar().then(aplicarEstado));
+    SENAEnglish.socket.on("ranking_actualizado", renderRanking);
+    SENAEnglish.socket.on("estado_inicial", aplicarEstado);
+
+    document.getElementById("btn-reiniciar").addEventListener("click", () => {
+      if (confirm("¿Reiniciar la evaluación? Se borran progreso, aciertos y puntajes de todos los participantes.")) {
+        SENAEnglish.reiniciarEvaluacion();
+      }
+    });
+  </script>
+</body>
+</html>

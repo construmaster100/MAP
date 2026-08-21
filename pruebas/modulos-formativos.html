@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prueba — Módulos formativos</title>
+<style>
+  body { margin:0; font-family:"Segoe UI",Roboto,system-ui,sans-serif; background:#f2f5f3; color:#1a1a1a; }
+  .marco { max-width:860px; margin:0 auto; padding:24px 18px 48px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .bajada { margin:0 0 18px; font-size:13px; color:#6b7b72; line-height:1.5; }
+  .resumen { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+  .cifra { flex:1 1 130px; padding:12px 14px; border-radius:10px; background:#fff;
+           border:1px solid #dfe6e1; text-align:center; }
+  .cifra b { display:block; font-size:26px; line-height:1.1; }
+  .cifra span { font-size:11px; color:#6b7b72; }
+  .verde b { color:#0f766e; } .rojo b { color:#c62828; }
+  .grupo { margin-bottom:16px; }
+  .grupo h2 { font-size:13px; text-transform:uppercase; letter-spacing:.05em;
+              color:#6b7b72; margin:0 0 6px; }
+  .caso { display:flex; gap:9px; padding:8px 12px; border:1px solid #dfe6e1;
+          border-left:3px solid #0f766e; border-radius:8px; background:#fff;
+          margin-bottom:5px; font-size:13px; align-items:flex-start; }
+  .caso.mal { border-left-color:#c62828; background:#fdeceb; }
+  .caso .marca { font-weight:700; }
+  .caso .detalle { display:block; font-size:11px; color:#6b7b72; margin-top:2px; }
+  .aviso { padding:12px 14px; border-radius:8px; background:#fff8e1;
+           border:1px solid #ffe08a; font-size:12.5px; line-height:1.5; margin-bottom:18px; }
+  code { background:#eef2f0; padding:1px 5px; border-radius:4px; font-size:12px; }
+</style>
+</head>
+<body>
+<div class="marco">
+
+  <h1>Prueba — Módulos formativos de cuatro partes</h1>
+  <p class="bajada">
+    Esta página carga <strong>los mismos archivos JavaScript que usan los paneles</strong>
+    —no copias— y ejecuta comprobaciones reales contra ellos. Si todo sale verde,
+    el requisito está implementado y funciona.
+  </p>
+
+  <div class="aviso">
+    <strong>No toca tus datos.</strong> Antes de empezar guarda una copia de las claves
+    <code>sgma_modulos_formativos</code> y <code>sgma_validaciones_ra</code>, y al terminar
+    las restaura exactamente como estaban. Puedes abrir esta página con el sistema en uso.
+  </div>
+
+  <div class="resumen">
+    <div class="cifra verde"><b id="n-bien">0</b><span>comprobaciones pasadas</span></div>
+    <div class="cifra rojo"><b id="n-mal">0</b><span>fallidas</span></div>
+    <div class="cifra"><b id="n-total">0</b><span>en total</span></div>
+  </div>
+
+  <div id="salida"></div>
+
+</div>
+
+<!-- Los módulos reales del sistema, en el mismo orden que en los paneles -->
+<script src="../assets/js/estado/ficha.js"></script>
+<script src="../assets/js/evaluacion/embebidos-catalogo.js"></script>
+<script src="../assets/js/estado/fichas-n.js"></script>
+<script src="../assets/js/estado/modulos-formativos.js"></script>
+
+<script>
+(function () {
+  /* ── Copia de seguridad: la prueba no debe dejar rastro ── */
+  const CLAVES = ['sgma_modulos_formativos', 'sgma_validaciones_ra'];
+  const copia = {};
+  CLAVES.forEach(k => { copia[k] = localStorage.getItem(k); });
+  CLAVES.forEach(k => localStorage.removeItem(k));
+
+  const salida = document.getElementById('salida');
+  let bien = 0, mal = 0;
+  let grupoActual = null;
+
+  function grupo(titulo) {
+    grupoActual = document.createElement('div');
+    grupoActual.className = 'grupo';
+    const h = document.createElement('h2');
+    h.textContent = titulo;
+    grupoActual.appendChild(h);
+    salida.appendChild(grupoActual);
+  }
+
+  function comprobar(descripcion, condicion, detalle) {
+    const paso = condicion === true;
+    paso ? bien++ : mal++;
+
+    const caso = document.createElement('div');
+    caso.className = 'caso' + (paso ? '' : ' mal');
+
+    const marca = document.createElement('span');
+    marca.className = 'marca';
+    marca.textContent = paso ? '✔' : '✘';
+
+    const texto = document.createElement('span');
+    texto.textContent = descripcion;
+    if (detalle) {
+      const d = document.createElement('span');
+      d.className = 'detalle';
+      d.textContent = detalle;
+      texto.appendChild(d);
+    }
+
+    caso.append(marca, texto);
+    grupoActual.appendChild(caso);
+  }
+
+  /* ══ 1. Las cuatro partes ══ */
+  grupo('1 · El módulo tiene exactamente cuatro partes fijas');
+
+  comprobar('PARTES_MODULO existe y trae 4 partes',
+    Array.isArray(PARTES_MODULO) && PARTES_MODULO.length === 4,
+    'valor: ' + JSON.stringify(PARTES_MODULO));
+
+  comprobar('Son Contenido, Práctica, Evaluación y Evidencia',
+    PARTES_MODULO.join('|') === 'Contenido|Práctica|Evaluación|Evidencia');
+
+  /* ══ 2. Crear un módulo ══ */
+  grupo('2 · Administrador e instructor pueden crear un módulo');
+
+  const antes = getModulosFormativos().length;
+  const creado = crearModuloFormativo({
+    nombre: 'Prueba automática',
+    fichaId: '3293836',
+    instructor: 'Instructor de prueba',
+    ra: 'RA-01',
+    creadoPor: 'Administrador'
+  });
+
+  comprobar('crearModuloFormativo() devuelve un módulo con id',
+    Boolean(creado && creado.id), 'id: ' + (creado && creado.id));
+
+  comprobar('El módulo queda guardado y se lee de vuelta',
+    getModulosFormativos().length === antes + 1,
+    'antes ' + antes + ', ahora ' + getModulosFormativos().length);
+
+  comprobar('Nace con sus cuatro partes vacías',
+    PARTES_MODULO.every(p => Array.isArray(creado.partes[p]) && creado.partes[p].length === 0));
+
+  comprobar('Guarda quién lo creó',
+    creado.creadoPor === 'Administrador', 'creadoPor: ' + creado.creadoPor);
+
+  /* ══ 3. Instructor propio y ficha ══ */
+  grupo('3 · El módulo se relaciona con una ficha y con un instructor propio');
+
+  comprobar('Queda ligado a la ficha indicada',
+    creado.fichaId === '3293836', 'fichaId: ' + creado.fichaId);
+
+  comprobar('Admite un instructor que no es titular de la ficha',
+    creado.instructor === 'Instructor de prueba', 'instructor: ' + creado.instructor);
+
+  comprobar('Ese instructor nuevo pasa a estar disponible para otros módulos',
+    instructoresDisponibles().some(i => i.nombre === 'Instructor de prueba'),
+    'disponibles: ' + instructoresDisponibles().map(i => i.nombre).join(', '));
+
+  comprobar('Declara el resultado de aprendizaje que valida',
+    creado.ra === 'RA-01', 'ra: ' + creado.ra);
+
+  /* ══ 4. Enganchar actividades ══ */
+  grupo('4 · A cada parte se le enganchan actividades del catálogo');
+
+  const act = EMBEBIDOS[0].id;
+  alternarActividadEnParte(creado.id, 'Contenido', act);
+  let recargado = buscarModuloFormativo(creado.id);
+
+  comprobar('Añadir una actividad a una parte queda guardado',
+    recargado.partes['Contenido'].indexOf(act) !== -1,
+    'Contenido: ' + JSON.stringify(recargado.partes['Contenido']));
+
+  comprobar('El módulo aún NO está armado con una sola parte llena',
+    moduloArmado(recargado) === false,
+    'partes vacías: ' + partesVacias(recargado).join(', '));
+
+  ['Práctica', 'Evaluación', 'Evidencia'].forEach((parte, i) => {
+    alternarActividadEnParte(creado.id, parte, EMBEBIDOS[i + 1].id);
+  });
+  recargado = buscarModuloFormativo(creado.id);
+
+  comprobar('Con las cuatro partes llenas, el módulo queda armado',
+    moduloArmado(recargado) === true);
+
+  alternarActividadEnParte(creado.id, 'Contenido', act);
+  comprobar('Volver a pulsar la actividad la quita de la parte',
+    buscarModuloFormativo(creado.id).partes['Contenido'].indexOf(act) === -1);
+
+  alternarActividadEnParte(creado.id, 'Contenido', act);
+
+  comprobar('Una parte inventada se rechaza',
+    alternarActividadEnParte(creado.id, 'Parte Falsa', act) === false);
+
+  /* ══ 5. Avance del aprendiz ══ */
+  grupo('5 · El módulo mide el avance del aprendiz');
+
+  const modulo = buscarModuloFormativo(creado.id);
+  const ids = actividadesDelModulo(modulo);
+
+  const sinNada = avanceEnModulo(modulo, {});
+  comprobar('Sin actividades resueltas, el avance es 0 %',
+    sinNada.porcentaje === 0 && sinNada.completo === false);
+
+  const marcasFalsas = {};
+  ids.forEach(id => { marcasFalsas[id] = { mejor: 100, intentos: 1 }; });
+  const conTodo = avanceEnModulo(modulo, marcasFalsas);
+
+  comprobar('Con todas resueltas, el avance es 100 % y queda completo',
+    conTodo.porcentaje === 100 && conTodo.completo === true,
+    conTodo.hechas + ' de ' + conTodo.total);
+
+  const mitad = {};
+  mitad[ids[0]] = { mejor: 80, intentos: 1 };
+  const parcial = avanceEnModulo(modulo, mitad);
+  comprobar('Con una sola resuelta el avance es parcial, no completo',
+    parcial.completo === false && parcial.hechas === 1);
+
+  /* ══ 6. Validación manual del RA ══ */
+  grupo('6 · El RA lo valida el instructor, nunca el sistema');
+
+  const APRENDIZ = 'aprendiz-99';
+
+  comprobar('Completar el módulo NO aprueba el RA por sí solo',
+    getValidacion(APRENDIZ, modulo.id) === null,
+    'avance 100 % y sigue sin validar');
+
+  const v = validarResultado(APRENDIZ, modulo.id, 'Zulma Salas', 'Cumple');
+
+  comprobar('El instructor puede aprobarlo',
+    v.estado === 'Aprobado');
+
+  comprobar('Queda constancia de quién validó',
+    v.por === 'Zulma Salas', 'por: ' + v.por);
+
+  comprobar('Queda constancia de cuándo',
+    !isNaN(new Date(v.fecha)), 'fecha: ' + v.fecha);
+
+  comprobar('La validación se lee de vuelta desde el almacén',
+    getValidacion(APRENDIZ, modulo.id).por === 'Zulma Salas');
+
+  comprobar('Se puede retirar la validación',
+    retirarValidacion(APRENDIZ, modulo.id) !== false &&
+    getValidacion(APRENDIZ, modulo.id) === null);
+
+  comprobar('La validación es por aprendiz: no se contagia a otro',
+    (function () {
+      validarResultado('aprendiz-1', modulo.id, 'Zulma Salas', '');
+      return getValidacion('aprendiz-2', modulo.id) === null;
+    })());
+
+  /* ══ 7. Eliminar ══ */
+  grupo('7 · Ciclo de vida completo');
+
+  eliminarModuloFormativo(creado.id);
+  comprobar('El módulo se puede eliminar',
+    buscarModuloFormativo(creado.id) === null);
+
+  comprobar('Los demás módulos sobreviven',
+    getModulosFormativos().length === antes,
+    'quedan ' + getModulosFormativos().length);
+
+  /* ── Restaurar y rematar ── */
+  CLAVES.forEach(k => {
+    if (copia[k] === null) localStorage.removeItem(k);
+    else localStorage.setItem(k, copia[k]);
+  });
+
+  document.getElementById('n-bien').textContent = bien;
+  document.getElementById('n-mal').textContent = mal;
+  document.getElementById('n-total').textContent = bien + mal;
+  document.title = (mal ? '✘ ' + mal + ' fallos' : '✔ todo pasa') + ' — Módulos formativos';
+})();
+</script>
+
+</body>
+</html>

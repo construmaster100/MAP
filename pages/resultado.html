@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resultado · SENAEnglish</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="board-body">
+
+  <main class="board-wrap">
+    <header class="board-header">
+      <span class="topbar-eyebrow">SENAEnglish · Evaluación de inglés</span>
+      <h1>Resultado</h1>
+      <p id="connected-count" class="board-sub">— participantes conectados</p>
+    </header>
+
+    <section class="result-card" id="result-card" hidden>
+      <span class="result-badge">EVALUACIÓN FINALIZADA</span>
+      <div class="result-user">
+        <span class="color-dot" id="result-color-dot"></span>
+        <span id="result-nombre">—</span>
+      </div>
+      <dl class="result-grid">
+        <div><dt>Preguntas</dt><dd id="result-total">30</dd></div>
+        <div><dt>Aciertos</dt><dd id="result-aciertos">0</dd></div>
+        <div><dt>Desaciertos</dt><dd id="result-desaciertos">0</dd></div>
+        <div><dt>Score</dt><dd id="result-score">0 / 30</dd></div>
+        <div><dt>Porcentaje</dt><dd id="result-porcentaje">0 %</dd></div>
+      </dl>
+      <button type="button" class="login-submit" id="btn-nueva-evaluacion">Salir</button>
+    </section>
+
+    <h2 class="ranking-heading">Ranking — hasta 20 participantes</h2>
+    <ol class="top5-board" id="ranking-board"></ol>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="../assets/js/senaenglish-client.js"></script>
+  <script>
+    const resultCard = document.getElementById("result-card");
+    const connectedCount = document.getElementById("connected-count");
+    const rankingBoard = document.getElementById("ranking-board");
+    let paletaPorId = {};
+
+    function colorHex(colorId) { return paletaPorId[colorId] || "#999"; }
+
+    function renderRankingBoard(ranking) {
+      rankingBoard.innerHTML = "";
+      if (!ranking.length) {
+        rankingBoard.innerHTML = '<li class="top5-empty">Todavía no hay evaluaciones finalizadas.</li>';
+        return;
+      }
+      ranking.forEach((p, i) => {
+        const li = document.createElement("li");
+        li.className = "top5-board-item";
+        li.innerHTML = `
+          <span class="top5-board-pos">${i + 1}</span>
+          <span class="color-dot" style="background:${colorHex(p.color)}"></span>
+          <span class="top5-board-name">${p.nombre}</span>
+          <span class="top5-board-aciertos">${p.aciertos} aciertos</span>
+          <span class="top5-board-score">${p.score}</span>`;
+        rankingBoard.appendChild(li);
+      });
+    }
+
+    function renderResultadoPropio(resultado) {
+      document.getElementById("result-color-dot").style.background = colorHex(resultado.color);
+      document.getElementById("result-nombre").textContent = resultado.nombre;
+      document.getElementById("result-total").textContent = resultado.totalPreguntas;
+      document.getElementById("result-aciertos").textContent = resultado.aciertos;
+      document.getElementById("result-desaciertos").textContent = resultado.desaciertos;
+      document.getElementById("result-score").textContent = `${resultado.score} / ${resultado.totalPreguntas}`;
+      document.getElementById("result-porcentaje").textContent = `${resultado.porcentaje.toFixed(2)} %`;
+      resultCard.hidden = false;
+    }
+
+    async function aplicarEstadoGeneral(estado) {
+      estado.config.paleta.forEach((c) => { paletaPorId[c.id] = c.hex; });
+      const conectados = estado.participantes.filter((p) => p.conectado).length;
+      connectedCount.textContent = `${conectados} participante${conectados === 1 ? "" : "s"} conectado${conectados === 1 ? "" : "s"}`;
+      renderRankingBoard(estado.ranking);
+    }
+
+    async function iniciar() {
+      await SENAEnglish.observar().then(aplicarEstadoGeneral);
+      SENAEnglish.socket.on("ranking_actualizado", renderRankingBoard);
+      SENAEnglish.socket.on("jugador_nuevo", () => SENAEnglish.observar().then(aplicarEstadoGeneral));
+      SENAEnglish.socket.on("jugador_desconectado", () => SENAEnglish.observar().then(aplicarEstadoGeneral));
+
+      const sesion = SENAEnglish.obtenerSesion();
+      if (!sesion) return;
+
+      const rejoin = await SENAEnglish.reclamarSesion();
+      if (!rejoin.ok) { SENAEnglish.borrarSesion(); return; }
+      rejoin.config.paleta.forEach((c) => { paletaPorId[c.id] = c.hex; });
+
+      if (!rejoin.participante.finalizado) {
+        window.location.href = "quiz.html";
+        return;
+      }
+
+      const final = await SENAEnglish.finalizar();
+      if (final.ok) renderResultadoPropio(final.resultado);
+    }
+
+    document.getElementById("btn-nueva-evaluacion").addEventListener("click", () => {
+      SENAEnglish.borrarSesion();
+      window.location.href = "../index.html";
+    });
+
+    iniciar();
+  </script>
+</body>
+</html>

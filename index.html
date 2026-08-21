@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SENAEnglish — Sistema de Evaluación Interactiva de Inglés</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="login-body">
+
+  <main class="login-wrap">
+    <section class="login-card">
+      <span class="topbar-eyebrow">SENAEnglish · Evaluación de inglés</span>
+      <h1 class="login-title">Ingresa a la evaluación</h1>
+      <p class="login-sub">Elige tu nombre y tu color, y responde un cuestionario de 30 preguntas sobre IF, THEN, USED TO e INFINITIVE. Tu resultado se sincroniza con el ranking en tiempo real.</p>
+
+      <form id="login-form" class="login-form">
+        <label class="login-label" for="nombre-input">Nombre de usuario</label>
+        <input id="nombre-input" class="login-input" type="text" maxlength="20" placeholder="Ej: CARLOS" autocomplete="off" required>
+
+        <span class="login-label">Color</span>
+        <div id="color-grid" class="color-grid" role="radiogroup" aria-label="Selección de color"></div>
+
+        <p id="login-error" class="login-error" hidden></p>
+
+        <button type="submit" class="login-submit" id="login-submit">Comenzar la evaluación</button>
+      </form>
+    </section>
+
+    <aside class="login-card login-lobby">
+      <div class="minimap-heading">
+        <span>Participantes conectados</span>
+        <span id="lobby-count">0 conectados</span>
+      </div>
+      <ul id="lobby-list" class="lobby-list"></ul>
+    </aside>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="assets/js/senaenglish-client.js"></script>
+  <script>
+    const colorGrid = document.getElementById("color-grid");
+    const form = document.getElementById("login-form");
+    const nombreInput = document.getElementById("nombre-input");
+    const errorEl = document.getElementById("login-error");
+    const submitBtn = document.getElementById("login-submit");
+    const lobbyList = document.getElementById("lobby-list");
+    const lobbyCount = document.getElementById("lobby-count");
+
+    let paleta = [];
+    let colorElegido = null;
+
+    function coloresTomados(participantes) {
+      return new Set(participantes.filter((p) => p.conectado).map((p) => p.color));
+    }
+
+    function pintarPaleta(participantes) {
+      const tomados = coloresTomados(participantes);
+      colorGrid.innerHTML = "";
+      paleta.forEach((c) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "color-swatch";
+        btn.style.background = c.hex;
+        btn.title = c.nombre;
+        btn.setAttribute("role", "radio");
+        btn.setAttribute("aria-label", c.nombre);
+        const ocupado = tomados.has(c.id);
+        btn.disabled = ocupado;
+        btn.classList.toggle("is-taken", ocupado);
+        btn.classList.toggle("is-selected", colorElegido === c.id);
+        btn.addEventListener("click", () => {
+          colorElegido = c.id;
+          [...colorGrid.children].forEach((el) => el.classList.remove("is-selected"));
+          btn.classList.add("is-selected");
+        });
+        colorGrid.appendChild(btn);
+      });
+    }
+
+    function pintarLobby(participantes) {
+      const conectados = participantes.filter((p) => p.conectado);
+      lobbyCount.textContent = `${conectados.length} conectado${conectados.length === 1 ? "" : "s"}`;
+      lobbyList.innerHTML = "";
+      if (!conectados.length) {
+        const li = document.createElement("li");
+        li.className = "lobby-empty";
+        li.textContent = "Todavía no hay nadie en la evaluación. ¡Sé el primero!";
+        lobbyList.appendChild(li);
+        return;
+      }
+      conectados.forEach((p) => {
+        const info = paleta.find((c) => c.id === p.color);
+        const li = document.createElement("li");
+        const progreso = p.finalizado ? "Finalizado" : `${p.preguntaActual} / ${p.totalPreguntas}`;
+        li.innerHTML = `<span class="color-dot" style="background:${info ? info.hex : "#999"}"></span> ${p.nombre} <span class="lobby-progress">${progreso}</span>`;
+        lobbyList.appendChild(li);
+      });
+    }
+
+    function aplicarEstado(estado) {
+      paleta = estado.config.paleta;
+      pintarPaleta(estado.participantes);
+      pintarLobby(estado.participantes);
+    }
+
+    SENAEnglish.observar().then(aplicarEstado);
+    SENAEnglish.socket.on("jugador_nuevo", () => SENAEnglish.observar().then(aplicarEstado));
+    SENAEnglish.socket.on("jugador_reconectado", () => SENAEnglish.observar().then(aplicarEstado));
+    SENAEnglish.socket.on("jugador_desconectado", () => SENAEnglish.observar().then(aplicarEstado));
+    SENAEnglish.socket.on("jugador_actualizado", () => SENAEnglish.observar().then(aplicarEstado));
+
+    const sesionPrevia = SENAEnglish.obtenerSesion();
+    if (sesionPrevia) {
+      SENAEnglish.reclamarSesion().then((res) => {
+        if (res.ok) window.location.href = "pages/quiz.html";
+      });
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      errorEl.hidden = true;
+      const nombre = nombreInput.value.trim();
+      if (!nombre) {
+        errorEl.textContent = "Ingresa un nombre de usuario.";
+        errorEl.hidden = false;
+        return;
+      }
+      if (!colorElegido) {
+        errorEl.textContent = "Elige un color disponible.";
+        errorEl.hidden = false;
+        return;
+      }
+      submitBtn.disabled = true;
+      const respuesta = await SENAEnglish.unirse(nombre, colorElegido);
+      submitBtn.disabled = false;
+      if (!respuesta.ok) {
+        errorEl.textContent = respuesta.motivo || "No se pudo ingresar a la evaluación.";
+        errorEl.hidden = false;
+        return;
+      }
+      window.location.href = "pages/quiz.html";
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1026 @@
+/* ══════════════════════════════════════════
+   SGMA-ADSO — Árbol de niveles desbloqueables
+   Se usa en «Reportar evidencia de aprendizaje»
+   (Módulo 3 — Práctica) del panel del aprendiz.
+══════════════════════════════════════════ */
+
+/* ── Color de acento ──
+   Un solo sitio del que salen todos los verdes-azulados de
+   estos componentes; cambiándolo aquí cambian todos. */
+
+:root {
+  --acento: #3faebe;
+  --acento-oscuro: #2f8e9c;
+  --acento-suave: #e8f6f8;
+  --acento-brillo: #5fc4d2;   /* la parada alta del degradado gloss */
+  --acento-texto: #fff;       /* lo que se lee encima del acento */
+
+  /* Lo que queda entre el borde de la barra y la columna
+     lateral: solo el título de vista (24 texto + 12 padding
+     + 2 borde + 18 margen). El encabezado del panel ya no
+     está, así que no suma. */
+  --subida-lateral: 56px;
+}
+
+/* ── Sidebar derecho alineado con el borde del navbar ──
+   Por defecto la columna arranca debajo del título de vista
+   y del encabezado del panel. El tirón la sube hasta el
+   filo superior del área de contenido y la deja fija ahí. */
+
+.panel-lateral-alto {
+  margin-top: calc(var(--subida-lateral) * -1);
+  position: sticky;
+  top: 12px;
+  align-self: start;
+  z-index: 5;              /* por encima de la línea del título de vista */
+
+  /* Fondo propio: al subir, tapa la línea del título de vista */
+  padding: 14px 0 14px 16px;
+  border-left: 3px solid var(--acento);
+  border-radius: 10px 0 0 10px;
+  background: #fff;
+  box-shadow: -6px 0 14px rgba(255, 255, 255, .9);
+}
+
+/* ── Estilo del sidebar: blanco y negro con acento azul ──
+   Minimalista: superficies blancas, texto negro, una sola
+   nota de color. Los botones y las fichas llevan brillo
+   (degradado suave más filo claro arriba). Todo va acotado
+   a .panel-lateral-alto para no tocar el panel del
+   administrador, que usa las mismas clases a ancho completo. */
+
+/* Las rejillas heredadas asumen ancho completo: en 250px
+   se desbordarían. Aquí van a una sola columna. */
+.panel-lateral-alto .pantallas {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin-bottom: 0;
+}
+
+.panel-lateral-alto .pantalla,
+.panel-lateral-alto .pantalla-administrar,
+.panel-lateral-alto .pantalla-ancha {
+  grid-column: auto;
+  min-height: 0;
+  background: #fff;
+  color: #111;
+  border: 1px solid #e6ebed;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(17, 17, 17, .05);
+}
+
+/* ── Paleta por rol ──
+   Cada panel lleva su acento; el resto del estilo (blanco,
+   negro y gloss) es el mismo en los tres. Solo cambian estas
+   cinco variables. */
+
+.lateral-aprendiz {
+  --acento: #0f3d1f;          /* verde oscuro */
+  --acento-oscuro: #082a14;
+  --acento-brillo: #1c5c31;
+  --acento-suave: #eaf3ed;
+  --acento-texto: #fff;
+}
+
+.lateral-admin {
+  --acento: #f5c518;          /* amarillo */
+  --acento-oscuro: #d1a308;
+  --acento-brillo: #ffd94a;
+  --acento-suave: #fdf6dd;
+  --acento-texto: #1a1a1a;    /* sobre amarillo, texto oscuro */
+}
+
+.lateral-instructor {
+  --acento: #6a1b9a;          /* morado, igual al badge de rol instructor */
+  --acento-oscuro: #4a1268;
+  --acento-brillo: #8e3fc0;
+  --acento-suave: #f3e5f5;
+  --acento-texto: #fff;
+}
+
+/* Cabecera con brillo, la única superficie de color */
+.panel-lateral-alto .pantalla-barra {
+  background: linear-gradient(180deg,
+              var(--acento-brillo) 0%,
+              var(--acento) 52%,
+              var(--acento-oscuro) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45),
+              inset 0 -1px 0 rgba(0, 0, 0, .08);
+  color: var(--acento-texto);
+  font-size: 10px;
+  letter-spacing: .09em;
+}
+
+.panel-lateral-alto .pantalla-led {
+  background: var(--acento-texto);
+  animation: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, .28);
+}
+
+/* Sobre amarillo el halo blanco no se ve: se oscurece */
+.lateral-admin .pantalla-led {
+  box-shadow: 0 0 0 3px rgba(26, 26, 26, .18);
+}
+
+.panel-lateral-alto .pantalla-cuerpo {
+  padding: 12px;
+  gap: 8px;
+}
+
+/* Una acción por fila: en esta anchura, dos no caben */
+.panel-lateral-alto .acciones-rejilla {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+
+/* Fichas tipo gloss */
+.panel-lateral-alto .accion {
+  padding: 9px 11px;
+  border: 1px solid #e2e8ea;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #fff 0%, #f7fafb 55%, #eef3f5 100%);
+  box-shadow: inset 0 1px 0 #fff,
+              0 1px 2px rgba(17, 17, 17, .06);
+  color: #111;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  transition: transform .12s ease, box-shadow .12s ease,
+              border-color .12s ease, background .12s ease;
+}
+
+.panel-lateral-alto .accion img {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+}
+
+.panel-lateral-alto .accion:hover {
+  border-color: var(--acento);
+  background: linear-gradient(180deg, #fff 0%, var(--acento-suave) 100%);
+  /* La segunda gana donde haya color-mix; donde no, queda la
+     sombra neutra en vez de perderse el brillo entero. */
+  box-shadow: inset 0 1px 0 #fff,
+              0 3px 8px rgba(17, 17, 17, .14);
+  box-shadow: inset 0 1px 0 #fff,
+              0 3px 8px color-mix(in srgb, var(--acento) 28%, transparent);
+  transform: translateY(-1px);
+}
+
+.panel-lateral-alto .accion:active {
+  transform: translateY(0);
+  box-shadow: inset 0 2px 4px rgba(17, 17, 17, .12);
+}
+
+.panel-lateral-alto .accion:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+/* El gráfico va sobre blanco, no sobre el azul oscuro */
+.panel-lateral-alto .gr-lienzo {
+  background: #fff;
+  border-radius: 8px;
+}
+
+/* Bajo 1100px la rejilla se apila: el tirón estorbaría */
+@media (max-width: 1100px) {
+  .panel-lateral-alto {
+    margin-top: 0;
+    position: static;
+    z-index: auto;
+  }
+}
+
+/* ── Los módulos dentro del tablero ──
+   El tablero venía con dos filas (barra y pantalla). Los
+   módulos entran como fila propia arriba, antes de la
+   pantalla, para que sean lo primero que se ve. */
+
+.tablero { grid-template-rows: auto auto minmax(320px, 1fr); }
+
+.tablero-modulos {
+  padding: 16px 18px 4px;
+}
+
+.tablero-modulo-titulo {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: #bcd8ef;
+}
+
+/* Flexbox en vez de grid: si la última fila queda con menos
+   tarjetas que caben, esas tarjetas crecen y llenan el ancho
+   en vez de dejar hueco a la derecha (con grid, auto-fit solo
+   colapsa columnas vacías en TODAS las filas, no en la última
+   fila corta). */
+.card-modulo-rejilla {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.tablero-modulos .card-modulo {
+  flex: 1 1 220px;
+  max-width: 340px;
+  margin: 0;
+  border-color: rgba(255, 255, 255, .18);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .22);
+}
+
+.card-modulo-vacio {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: 12px;
+  color: #bcd8ef;
+}
+
+/* Tablero sin pantalla de actividades: solo barra y módulos.
+   Sin esto la tercera fila reservaría 320px en blanco. */
+.tablero-compacto { grid-template-rows: auto auto auto; }
+
+/* Los niveles del módulo, dentro del tablero */
+.tablero-niveles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 18px 18px;
+}
+
+.tablero-nivel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .07);
+  border: 1px solid rgba(255, 255, 255, .12);
+}
+
+.tablero-nivel-marca {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, .16);
+  color: #e8f2fa;
+}
+
+.tablero-nivel-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.tablero-nivel-titulo {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e8f2fa;
+}
+
+.tablero-nivel-meta {
+  font-size: 11px;
+  color: #a9c9e4;
+  line-height: 1.4;
+}
+
+.tablero-nivel .status-badge { margin-left: auto; flex: 0 0 auto; }
+
+/* ── Card de módulo destacado (los tres paneles) ── */
+
+.card-modulo {
+  display: flex;
+  flex-direction: column;
+  max-width: 300px;
+  margin: 14px 0;
+  border: 1px solid #dfe6e1;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, .07);
+}
+
+.card-modulo.es-cerrado { opacity: .78; }
+
+.card-modulo-portada {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  background: #eef2ef;
+}
+
+.card-modulo-portada img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.card-modulo-cinta {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.card-modulo-cinta.es-si { background: var(--acento); }
+.card-modulo-cinta.es-no { background: #6b7b72; }
+
+/* Candado sobre la portada de los módulos cerrados */
+.card-modulo-candado {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  background: rgba(20, 32, 28, .48);
+}
+
+.card-modulo-cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 14px 14px;
+}
+
+.card-modulo-titulo {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.card-modulo-detalle {
+  font-size: 12px;
+  color: #7b8781;
+  line-height: 1.4;
+}
+
+.card-modulo-barra {
+  display: block;
+  width: 100%;
+  height: 5px;
+  margin-top: 8px;
+  border-radius: 3px;
+  background: #e3e9e5;
+  overflow: hidden;
+}
+
+.card-modulo-barra span {
+  display: block;
+  height: 100%;
+  background: var(--acento);
+}
+
+/* ── Barra de autocompletado ──
+   Va al pie de la card; el desplegable flota encima de lo
+   que siga, para no empujar el resto del panel. */
+
+.autocompletar {
+  position: relative;
+  margin-top: 12px;
+  max-width: 420px;
+}
+
+.autocompletar input { width: 100%; }
+
+.autocompletar-lista {
+  position: absolute;
+  z-index: 30;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  border: 1px solid #dfe6e1;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .14);
+}
+
+.autocompletar-opcion {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.autocompletar-opcion:hover,
+.autocompletar-opcion.es-marcado {
+  background: var(--acento-suave);
+}
+
+.autocompletar-titulo {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.autocompletar-detalle {
+  font-size: 11px;
+  color: #7b8781;
+}
+
+/* ── Árbol ── */
+
+.arbol {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.arbol-rama {
+  border: 1px solid #dfe6e1;
+  border-left: 4px solid var(--acento);
+  border-radius: 10px;
+  background: #fff;
+  padding: 14px 16px 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .05);
+}
+
+.arbol-rama-cerrada {
+  border-left-color: #c0c8c4;
+  background: #fafbfa;
+}
+
+.arbol-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.arbol-modulo {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.arbol-estado {
+  margin-left: auto;
+  font-size: 11px;
+  color: #7b8781;
+}
+
+/* ── La cadena de niveles ── */
+
+.arbol-niveles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.arbol-nivel {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0 8px 0;
+}
+
+/* El hilo que une un nivel con el siguiente */
+.arbol-nivel + .arbol-nivel::before {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: -8px;
+  width: 2px;
+  height: 16px;
+  background: #dfe6e1;
+}
+
+.arbol-marca {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  border: 2px solid #dfe6e1;
+  background: #f2f5f3;
+  color: #7b8781;
+}
+
+.arbol-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.arbol-titulo {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.3;
+}
+
+.arbol-meta {
+  font-size: 11px;
+  color: #7b8781;
+  line-height: 1.4;
+}
+
+.arbol-ir {
+  margin-left: auto;
+  align-self: center;
+  flex: 0 0 auto;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: var(--acento);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.arbol-ir:hover { background: var(--acento-oscuro); color: #fff; }
+
+/* ── Estado de cada nodo ── */
+
+.arbol-nivel.es-hecho .arbol-marca {
+  border-color: var(--acento);
+  background: var(--acento);
+  color: #fff;
+}
+
+.arbol-nivel.es-abierto .arbol-marca {
+  border-color: var(--acento);
+  background: var(--acento-suave);
+  color: var(--acento-oscuro);
+}
+
+.arbol-nivel.es-esperando .arbol-marca {
+  border-color: #d9a441;
+  background: #fdf6e7;
+  color: #8a6414;
+}
+
+.arbol-nivel.es-esperando .arbol-titulo,
+.arbol-nivel.es-cerrado .arbol-titulo {
+  color: #7b8781;
+}
+
+.arbol-nivel.es-cerrado {
+  opacity: .65;
+}
+
+/* ══════════════════════════════════════════
+   Casilla de puntaje del aprendiz
+   Vive en su sidebar, así que hereda el verde de
+   .lateral-aprendiz por las variables de acento.
+══════════════════════════════════════════ */
+
+.billetera {
+  margin-bottom: 12px;
+  border: 1px solid #e6ebed;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(17, 17, 17, .05);
+}
+
+.billetera-barra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  background: linear-gradient(180deg,
+              var(--acento-brillo) 0%,
+              var(--acento) 52%,
+              var(--acento-oscuro) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45);
+  color: var(--acento-texto);
+}
+
+/* Monedita animada que señala el marcador de puntos */
+.billetera-moneda {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #ffe9a8 0%, #f5c542 48%, #d99b16 100%);
+  box-shadow: 0 1px 0 #c2870f, 0 3px 6px -3px rgba(120, 80, 0, .55);
+  animation: moneda-salta 1.6s ease-in-out infinite;
+}
+.billetera-moneda .acumular-cara { font-size: 10px; }
+@media (prefers-reduced-motion: reduce) {
+  .billetera-moneda { animation: none; }
+}
+
+.billetera-titulo {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+/* Marcador */
+.bil-marcador {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 14px 14px 10px;
+  text-align: center;
+}
+
+.bil-cifra {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--acento);
+  font-variant-numeric: tabular-nums;
+}
+
+.bil-rotulo {
+  font-size: 11px;
+  font-weight: 600;
+  color: #111;
+}
+
+.bil-desglose {
+  font-size: 10px;
+  color: #9aa5a8;
+}
+
+/* Los tres accesos */
+.bil-acciones {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  padding: 0 10px 10px;
+}
+
+.bil-accion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 7px 4px;
+  border: 1px solid #e2e8ea;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fff 0%, #f7fafb 55%, #eef3f5 100%);
+  box-shadow: inset 0 1px 0 #fff;
+  color: #111;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .12s ease, background .12s ease;
+}
+
+.bil-accion:hover {
+  border-color: var(--acento);
+  background: linear-gradient(180deg, #fff 0%, var(--acento-suave) 100%);
+}
+
+.bil-accion[aria-expanded="true"] {
+  border-color: var(--acento);
+  background: var(--acento-suave);
+}
+
+.bil-accion-simbolo { font-size: 15px; line-height: 1; }
+
+.bil-aviso {
+  margin: 0 12px 10px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  background: var(--acento-suave);
+  font-size: 11px;
+  line-height: 1.4;
+  color: #111;
+}
+
+.bil-aviso.es-malo {
+  background: #fdecea;
+  color: #8a2020;
+}
+
+/* Paneles desplegables */
+.bil-panel {
+  padding: 0 12px 12px;
+  border-top: 1px solid #eef2f3;
+}
+
+.bil-panel-titulo {
+  margin: 10px 0 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: #9aa5a8;
+}
+
+.bil-tienda,
+.bil-mias {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bil-mejora,
+.bil-mia {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #e6ebed;
+  border-radius: 8px;
+  background: #fff;
+  font-family: inherit;
+  text-align: left;
+}
+
+.bil-mejora { cursor: pointer; }
+
+.bil-mejora:hover:not(:disabled) {
+  border-color: var(--acento);
+  background: var(--acento-suave);
+}
+
+.bil-mejora.es-cara {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.bil-simbolo { font-size: 18px; line-height: 1; }
+
+.bil-mejora-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.bil-mejora-nombre {
+  font-size: 12px;
+  font-weight: 700;
+  color: #111;
+}
+
+.bil-mejora-detalle {
+  font-size: 10px;
+  color: #7b8781;
+  line-height: 1.35;
+}
+
+.bil-costo {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--acento);
+  font-variant-numeric: tabular-nums;
+}
+
+.bil-canjear {
+  padding: 4px 9px;
+  border: 1px solid var(--acento);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--acento);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.bil-canjear:hover { background: var(--acento-suave); }
+
+.bil-vacio {
+  margin: 0;
+  font-size: 11px;
+  color: #9aa5a8;
+}
+
+/* Formularios */
+.bil-label {
+  display: block;
+  margin: 8px 0 3px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: #7b8781;
+}
+
+.bil-campo {
+  width: 100%;
+  padding: 7px 9px;
+  border: 1px solid #dfe6e8;
+  border-radius: 7px;
+  font-family: inherit;
+  font-size: 12px;
+  color: #111;
+  background: #fff;
+}
+
+.bil-campo:focus {
+  outline: 2px solid var(--acento);
+  outline-offset: -1px;
+  border-color: var(--acento);
+}
+
+.bil-enviar {
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px;
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(180deg,
+              var(--acento-brillo) 0%,
+              var(--acento) 55%,
+              var(--acento-oscuro) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4);
+  color: var(--acento-texto);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bil-enviar:hover { filter: brightness(1.07); }
+
+/* ══════════════════════════════════════════
+   Módulos formativos de cuatro partes
+══════════════════════════════════════════ */
+
+.mf-modulo {
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border: 1px solid #e6ebed;
+  border-left: 3px solid #c0c8c4;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(17, 17, 17, .05);
+}
+
+.mf-modulo.es-armado { border-left-color: var(--acento); }
+
+.mf-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 2px;
+}
+
+.mf-titulo {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111;
+}
+
+.mf-cabecera .status-badge { margin-left: auto; }
+
+.mf-meta {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: #7b8781;
+}
+
+/* Las cuatro partes, una al lado de la otra */
+.mf-partes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 1000px) {
+  .mf-partes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 560px) {
+  .mf-partes { grid-template-columns: minmax(0, 1fr); }
+}
+
+.mf-parte {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid #eef2f3;
+  border-radius: 9px;
+  background: #fafbfc;
+}
+
+.mf-parte.es-vacia {
+  border-style: dashed;
+  border-color: #d9e0e2;
+}
+
+.mf-parte-titulo {
+  margin: 0 0 2px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: #7b8781;
+}
+
+.mf-actividad {
+  padding: 5px 8px;
+  border: 1px solid #e2e8ea;
+  border-radius: 7px;
+  background: #fff;
+  color: #111;
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mf-actividad:hover {
+  border-color: #d64545;
+  color: #8a2020;
+  text-decoration: line-through;
+}
+
+.mf-anadir {
+  margin-top: 2px;
+  padding: 5px 7px;
+  border: 1px dashed #cfd8db;
+  border-radius: 7px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 11px;
+  color: #7b8781;
+  cursor: pointer;
+  max-width: 100%;
+}
+
+.mf-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.mf-acciones-validacion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mf-validacion {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #eef2f3;
+}
+
+/* ── Identidad del instructor y exclusividad de ficha ── */
+
+.sidebar-quien {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 10px 14px 0;
+  font-size: 12px;
+  color: #111;
+}
+
+.sidebar-quien strong { font-weight: 700; }
+
+.ins-quien-doc {
+  font-size: 10px;
+  color: #7b8781;
+}
+
+.bloque-nota.es-malo {
+  padding: 8px 11px;
+  border-radius: 7px;
+  background: #fdecea;
+  color: #8a2020;
+}
+
+/* Cuando la ficha no es suya, el panel se ve consultable */
+.es-solo-lectura .section-table { opacity: .72; }

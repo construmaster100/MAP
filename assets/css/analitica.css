@@ -1,0 +1,232 @@
+/* ══════════════════════════════════════════
+   SGMA-ADSO — Analítica del administrador
+   Aula tridimensional, medidas descriptivas,
+   gráficos SVG y hoja de reportes.
+══════════════════════════════════════════ */
+
+/* ── Lista de fichas dentro de la pantalla ── */
+.pantalla-fichas {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  list-style: none;
+  padding: 0;
+}
+.pantalla-fichas li {
+  display: grid;
+  gap: 1px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  background: rgba(255,255,255,.09);
+  border-left: 3px solid #39a900;
+  cursor: pointer;
+  transition: background .12s ease;
+}
+.pantalla-fichas li:hover,
+.pantalla-fichas li:focus-visible { background: rgba(57,169,0,.24); outline: none; }
+.pf-nombre  { font-size: 12px; font-weight: 600; color: #fff; }
+.pf-detalle { font-size: 10.5px; color: rgba(232,242,250,.7); }
+
+/* ══════════════════════════════════════════
+   AULA TRIDIMENSIONAL
+   Cubo en perspectiva: cada aprendiz es una
+   columna cuya altura representa su avance.
+══════════════════════════════════════════ */
+
+.pantalla-aula .pantalla-cuerpo { gap: 10px; }
+.pt-aula-selector { max-width: 260px; font-size: 12px; }
+.aula-lienzo { overflow: auto; padding: 6px 0 2px; }
+
+.aula3d {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  perspective: 1100px;
+  padding: 30px 10px 12px;
+}
+
+.aula3d-cubo {
+  position: relative;
+  width: 420px;
+  height: 250px;
+  transform-style: preserve-3d;
+  transform: rotateX(56deg) rotateZ(-38deg);
+}
+
+.aula3d-cara { position: absolute; }
+
+.aula3d-piso {
+  inset: 0;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,.10) 0 1px, transparent 1px 52px),
+    repeating-linear-gradient(0deg,  rgba(0,0,0,.10) 0 1px, transparent 1px 52px),
+    linear-gradient(150deg, #b5602f, #c9713b);
+  border: 1px solid rgba(0,0,0,.25);
+}
+
+.aula3d-pared-fondo {
+  left: 0; top: 0;
+  width: 420px; height: 118px;
+  transform-origin: top;
+  transform: rotateX(-90deg);
+  background: linear-gradient(#efe9dc, #ddd5c4);
+  border: 1px solid rgba(0,0,0,.18);
+}
+
+.aula3d-pared-lado {
+  left: 0; top: 0;
+  width: 250px; height: 118px;
+  transform-origin: left top;
+  transform: rotateY(90deg) rotateX(-90deg) translateX(-250px) rotateZ(90deg);
+  background: linear-gradient(#e6dfd0, #d2c9b6);
+  border: 1px solid rgba(0,0,0,.18);
+}
+
+.aula3d-rejilla {
+  position: absolute;
+  inset: 16px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px 8px;
+  align-content: start;
+  transform-style: preserve-3d;
+}
+
+.aula3d-puesto {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 24px;
+}
+
+/* Se contrarrota la escena para que la columna quede vertical en pantalla */
+.aula3d-columna {
+  position: absolute;
+  bottom: 0;
+  width: 15px;
+  border-radius: 3px 3px 0 0;
+  transform-origin: bottom center;
+  transform: rotateZ(38deg) rotateX(-56deg);
+  box-shadow: 0 2px 6px rgba(0,0,0,.35);
+  cursor: help;
+  transition: filter .15s ease;
+}
+.aula3d-columna:hover { filter: brightness(1.25); }
+.col-alta  { background: linear-gradient(#7bdc4a, #39a900); }
+.col-media { background: linear-gradient(#ffcf6b, #f0a726); }
+.col-baja  { background: linear-gradient(#ff8f7a, #c62828); }
+
+.aula3d-cifra {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 3px;
+  border-radius: 3px;
+  background: rgba(255,255,255,.88);
+  font-size: 9px;
+  font-weight: bold;
+  color: #1c3d1c;
+}
+
+.aula3d-base {
+  position: absolute;
+  bottom: -3px;
+  width: 19px; height: 6px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.22);
+}
+
+.aula3d-pie { font-size: 11px; color: rgba(232,242,250,.75); text-align: center; }
+
+/* ── Medidas descriptivas ── */
+.medidas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+}
+.medida {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 12px 8px;
+  border-radius: 10px;
+  background: rgba(0,120,50,.07);
+  border: 1px solid rgba(0,120,50,.18);
+}
+.medida-valor {
+  font-size: 21px;
+  font-weight: bold;
+  color: #005c26;
+  font-variant-numeric: tabular-nums;
+}
+.medida-rotulo { font-size: 11px; color: #777; }
+
+/* ── Gráficos ── */
+.rejilla-graficos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+.gr-lienzo { overflow-x: auto; }
+.gr-svg { display: block; width: 100%; min-width: 320px; height: auto; }
+.gr-guia { stroke: #dfe6ea; stroke-width: 1; }
+.gr-guia-texto { font-size: 8px; fill: #9aa7ae; }
+.gr-eje { font-size: 8px; fill: #8b98a0; }
+.gr-barra { transition: opacity .15s ease; }
+.gr-barra:hover { opacity: .75; }
+.gr-alta  { fill: #39a900; }
+.gr-media { fill: #f0a726; }
+.gr-baja  { fill: #c62828; }
+.gr-media-linea { stroke: #0b3d66; stroke-width: 1.5; stroke-dasharray: 5 4; }
+.gr-media-texto { font-size: 9px; fill: #0b3d66; font-weight: bold; }
+.gr-area  { fill: rgba(57,169,0,.16); }
+.gr-linea { fill: none; stroke: #39a900; stroke-width: 2.5; stroke-linejoin: round; }
+.gr-punto { fill: #fff; stroke: #39a900; stroke-width: 2.5; }
+
+.gr-distribucion { display: grid; gap: 8px; }
+.gr-rango {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 9px;
+  font-size: 11.5px;
+}
+.gr-rango-nombre { color: #666; }
+.gr-rango-pista { height: 10px; border-radius: 5px; background: #eef1f3; overflow: hidden; }
+.gr-rango-pista i { display: block; height: 100%; transition: width .6s ease; }
+.gr-rango-cifra { font-weight: bold; color: #005c26; text-align: right; }
+
+/* ── Reportes ── */
+.rep-opciones {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 8px 16px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(255,255,255,.85);
+  border-radius: 10px;
+  background: rgba(255,255,255,.6);
+}
+.rep-check {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #444;
+  cursor: pointer;
+}
+.rep-cabecera { padding: 14px 0 4px; }
+.rep-cabecera h2 { font-size: 19px; font-weight: 600; color: #005c26; }
+.rep-meta { font-size: 12px; color: #777; margin-top: 3px; }
+.rep-bloque { margin-top: 20px; }
+.rep-bloque h2 { font-size: 15px; font-weight: bold; color: #005c26; margin-bottom: 10px; }
+
+/* Al imprimir solo interesa el reporte */
+@media print {
+  .sidebar, .navbar, .brandbar, .footer,
+  .titulo-vista, .sec-actions, .rep-opciones, .panel-lateral { display: none !important; }
+  .page-wrapper, .main-content { margin: 0 !important; background: #fff !important; }
+}

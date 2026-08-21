@@ -1,0 +1,210 @@
+/* ══════════════════════════════════════════
+   SGMA-ADSO — Sala de sistemas
+   Compartida por el fondo del login y por el
+   monitor en tiempo real del administrador.
+══════════════════════════════════════════ */
+
+/* ── Sala animada como fondo de la página ──
+   Capa fija detrás de todo. No recibe clics ni altera el flujo:
+   el contenido conserva su estructura y solo se eleva con z-index. */
+.fondo-sala{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    overflow:hidden;
+    padding:70px 24px 24px;
+    display:grid;
+    grid-template-columns:repeat(6, 1fr);
+    gap:70px 18px;
+    align-content:start;
+    opacity:.16;
+    background:#b5602f;
+    background-image:repeating-linear-gradient(90deg, rgba(0,0,0,.07) 0 2px, transparent 2px 62px),
+                     repeating-linear-gradient(0deg,  rgba(0,0,0,.07) 0 2px, transparent 2px 52px);
+}
+@media(max-width:900px){
+    .fondo-sala{ grid-template-columns:repeat(3, 1fr); }
+}
+
+/* El contenido va por encima del fondo, sin cambiar su maquetación */
+body > header,
+body > section,
+body > footer{
+    position:relative;
+    z-index:1;
+}
+
+
+@media(max-width:700px){
+    }
+
+.sala-estacion{
+    position:relative;
+    display:grid;
+    justify-items:center;
+}
+
+.sala-burbuja{
+    position:absolute;
+    bottom:100%;
+    margin-bottom:12px;
+    min-width:112px;
+    max-width:146px;
+    padding:8px 10px;
+    border-radius:14px;
+    background:#fff;
+    box-shadow:0 4px 10px rgba(0,0,0,.15);
+    font-size:11px;
+    color:#333;
+    opacity:0;
+    transform:translateY(6px) scale(.9);
+    z-index:5;
+}
+.sala-burbuja::after{
+    content:'';
+    position:absolute; left:50%; top:100%;
+    transform:translateX(-50%);
+    border:7px solid transparent;
+    border-top-color:#fff;
+}
+.sala-burbuja.sala-anim{ animation:sala-pop .35s ease forwards; }
+@keyframes sala-pop{ to{ opacity:1; transform:translateY(0) scale(1); } }
+
+.sala-b-head{
+    display:flex; align-items:center; gap:5px;
+    font-weight:bold; font-size:10.5px; margin-bottom:4px;
+}
+.sala-b-icon{
+    width:16px; height:16px; border-radius:5px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:10px; color:#fff; flex-shrink:0;
+}
+.sala-ic-texto  { background:#2f80ed; }
+.sala-ic-codigo { background:#7b2cbf; }
+.sala-ic-imagen { background:#0e9c7c; }
+
+.sala-dots span{
+    display:inline-block; width:5px; height:5px; border-radius:50%;
+    background:#2f80ed; margin-right:3px;
+    animation:sala-punto 1s infinite;
+}
+.sala-dots span:nth-child(2){ animation-delay:.15s; }
+.sala-dots span:nth-child(3){ animation-delay:.3s; }
+@keyframes sala-punto{ 0%,100%{opacity:.25;} 50%{opacity:1;} }
+
+.sala-linea-msg{
+    height:6px; border-radius:3px; background:#dbe8fd;
+    width:0; animation:sala-crecer 1.4s ease forwards .3s;
+}
+@keyframes sala-crecer{ to{ width:100%; } }
+
+.sala-code-line{
+    height:6px; border-radius:3px; margin-bottom:4px;
+    width:0; animation:sala-crecer .7s ease forwards;
+    background:#c9a8f5;
+}
+.sala-code-line.sala-l2{
+    background:#9adbc7; animation-delay:.5s;
+    animation-name:sala-crecer70;
+}
+@keyframes sala-crecer70{ to{ width:70%; } }
+.sala-code-line.sala-l3{ background:#f6c78a; animation-delay:.9s; }
+
+.sala-img-frame{
+    width:100%; height:46px; border-radius:6px; overflow:hidden;
+    position:relative; background:#eaf7f2; border:1px solid #cdeee0;
+}
+.sala-img-scene{
+    position:absolute; inset:0;
+    clip-path:inset(0 0 100% 0);
+    animation:sala-revelar 1.6s ease forwards .1s;
+}
+@keyframes sala-revelar{ to{ clip-path:inset(0 0 0 0); } }
+.sala-img-sol{ position:absolute; top:6px; right:10px; width:10px; height:10px; border-radius:50%; background:#f5b942; }
+.sala-img-monte{ position:absolute; bottom:0; left:0; border-left:22px solid transparent; border-right:22px solid transparent; border-bottom:26px solid #6fae5c; }
+.sala-img-monte2{ position:absolute; bottom:0; left:20px; border-left:16px solid transparent; border-right:16px solid transparent; border-bottom:18px solid #4f8f45; }
+
+/* ── Personaje ── */
+.sala-personaje{ position:relative; transform:rotateX(4deg); transform-origin:bottom center; }
+.sala-cabeza{
+    width:34px; height:30px; border-radius:12px 12px 10px 10px;
+    position:relative; margin:0 auto;
+}
+.sala-cabeza::before{
+    content:''; position:absolute; top:-9px; left:50%; transform:translateX(-50%);
+    width:2px; height:10px; background:#555;
+}
+.sala-cabeza::after{
+    content:''; position:absolute; top:-14px; left:50%; transform:translateX(-50%);
+    width:6px; height:6px; border-radius:50%; background:#e94b4b;
+}
+.sala-visor{ position:absolute; left:6px; right:6px; top:11px; height:8px; background:#1c1c1c; border-radius:4px; }
+.sala-cuerpo{ width:44px; height:36px; border-radius:8px; margin:2px auto 0; position:relative; }
+.sala-torso{
+    position:absolute; top:8px; left:50%; transform:translateX(-50%);
+    width:10px; height:10px; border:2px solid rgba(0,0,0,.35); border-radius:50%;
+}
+.verde    .sala-cabeza, .verde    .sala-cuerpo{ background:#5cb86c; }
+.amarillo .sala-cabeza, .amarillo .sala-cuerpo{ background:#f2b705; }
+.beige    .sala-cabeza, .beige    .sala-cuerpo{ background:#d8b48a; }
+
+.sala-escritorio{
+    width:78px; height:14px; background:#e4e4e4; border-radius:3px;
+    margin-top:6px; position:relative; box-shadow:0 3px 6px rgba(0,0,0,.15);
+}
+.sala-laptop{
+    position:absolute; top:-11px; left:50%; transform:translateX(-50%);
+    width:30px; height:11px; background:#3a3a3a; border-radius:2px 2px 0 0;
+}
+.sala-laptop::before{
+    content:''; position:absolute; inset:1px;
+    background:#5fa8ff; opacity:.5; border-radius:1px;
+}
+
+@media (prefers-reduced-motion: reduce){
+    .sala-burbuja.sala-anim,
+    .sala-dots span,
+    .sala-linea-msg,
+    .sala-code-line,
+    .sala-img-scene{ animation:none; }
+    .sala-burbuja.sala-anim{ opacity:1; transform:none; }
+    .sala-linea-msg,
+    .sala-code-line{ width:100%; }
+    .sala-img-scene{ clip-path:none; }
+}
+
+/* ── Recinto del monitor del administrador ── */
+.sala{
+    position:relative;
+    border-radius:14px;
+    overflow:hidden;
+    padding:16px 20px 46px;
+    background:linear-gradient(to bottom, #efe9dc 0%, #efe9dc 52%, #b5602f 52%, #c9713b 100%);
+}
+.sala-encabezado{
+    position:relative;
+    z-index:5;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:12px;
+    margin-bottom:44px;
+}
+.sala-rotulo{ font-size:13px; font-weight:bold; color:#3d3226; }
+.sala-sello{ font-size:11px; color:#6b5b46; white-space:nowrap; }
+
+.sala-grid{
+    position:relative;
+    z-index:4;
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:62px 16px;
+}
+@media(max-width:900px){
+    .sala-grid{ grid-template-columns:repeat(2,1fr); gap:64px 12px; }
+}
+
+/* Datos dentro de la burbuja */
+.sala-dato{ font-size:11px; color:#333; line-height:1.35; margin:0; }
+.sala-hora{ font-size:10px; color:#888; margin:3px 0 0; }

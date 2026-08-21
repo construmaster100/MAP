@@ -1,0 +1,282 @@
+/* ══════════════════════════════════════════
+   SGMA-ADSO — Login
+   Complementa Bootstrap 5.3, no lo reemplaza
+══════════════════════════════════════════ */
+
+body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:#ffffff;
+}
+
+/* BARRA SUPERIOR */
+
+.topbar{
+    background:#007832;
+    color:white;
+    font-size:14px;
+    font-weight:bold;
+}
+
+/* CONTENEDOR PRINCIPAL */
+
+.hero{
+    background:#ffffff;
+}
+
+/* CÍRCULOS DECORATIVOS */
+
+.circle-left,
+.circle-right{
+    position:absolute;
+    background:rgba(57,169,0,.08);
+    border-radius:50%;
+}
+
+.circle-left{
+    width:190px;
+    height:190px;
+    left:-40px;
+    top:35px;
+}
+
+.circle-right{
+    width:420px;
+    height:420px;
+    right:-120px;
+    top:-80px;
+}
+
+/* TEXTO ADSO SOBRE LA ILUSTRACIÓN */
+
+/* La figura ocupa toda la altura de la fila, que la fija la tarjeta de ingreso */
+.branding{
+    position:relative;
+    height:100%;
+    min-height:340px;
+    margin:0;
+    border-radius:22px;
+    overflow:hidden;
+    box-shadow:0 10px 26px rgba(0,0,0,.28);
+}
+
+.branding-sala{
+    display:block;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+/* Velo oscuro solo bajo el texto, para que se lea sobre la foto */
+.branding-texto{
+    position:absolute;
+    left:0; right:0; top:0;
+    padding:26px 28px 46px;
+    background:linear-gradient(to bottom, rgba(0,0,0,.55), rgba(0,0,0,0));
+}
+
+.branding h1{
+    color:white;
+    font-size:58px;
+    font-weight:bold;
+    line-height:1;
+    text-shadow:0 2px 10px rgba(0,0,0,.45);
+}
+
+.branding h2{
+    color:#8fd14f;
+    font-size:32px;
+    margin-left:4px;
+    text-shadow:0 2px 10px rgba(0,0,0,.45);
+}
+
+/* La tarjeta se centra en su columna sin estirarse */
+.login-card{
+    align-self:center;
+}
+
+@media(max-width:991.98px){
+    .branding{ min-height:260px; }
+    .branding-texto{ text-align:center; }
+}
+
+/* TARJETA LOGIN */
+
+.login-card{
+    max-width:400px;
+    background:#f3f3f3;
+    border-radius:22px;
+    box-shadow:0 0 15px rgba(0,0,0,.35);
+}
+
+.card-title-sena{
+    background:#007832;
+    color:white;
+    text-align:center;
+    padding:8px;
+    border-radius:5px;
+    font-weight:bold;
+}
+
+/* CAMPOS — efecto al enfocar */
+
+.input-group-text{
+    width:56px;
+    justify-content:center;
+    font-size:22px;
+    color:#555;
+    background:white;
+    transition:color .15s ease, border-color .15s ease;
+}
+
+.form-control,
+.form-select{
+    height:46px;
+}
+
+.form-control:focus,
+.form-select:focus{
+    border-color:#007832;
+    box-shadow:0 0 0 .25rem rgba(0,120,50,.25);
+}
+
+.input-group:focus-within .input-group-text{
+    color:#007832;
+    border-color:#007832;
+}
+
+.forgot{
+    text-decoration:none;
+    color:#555;
+    font-size:14px;
+}
+
+.forgot i{
+    font-size:22px;
+}
+
+.forgot:hover{
+    color:#007832;
+}
+
+/* MENSAJE DE ERROR */
+
+.login-msg{
+    text-align:center;
+    font-size:13px;
+    font-weight:bold;
+    min-height:18px;
+    margin-bottom:10px;
+}
+
+.login-msg.error  { color:#c62828; }
+.login-msg.success{ color:#005c26; }
+
+/* BOTÓN */
+
+.btn-sena{
+    height:56px;
+    background:#39a900;
+    border-color:#39a900;
+    color:white;
+    font-size:18px;
+    font-weight:bold;
+    box-shadow:0 0 8px rgba(0,0,0,.25);
+}
+
+.btn-sena:hover,
+.btn-sena:focus{
+    background:#319400;
+    border-color:#319400;
+    color:white;
+}
+
+/* PIE */
+
+.footer{
+    height:150px;
+    padding-left:60px;
+}
+
+.sena-logo{
+    color:#39a900;
+    font-size:65px;
+    font-weight:bold;
+}
+
+/* ── Enlaces externos del pie ── */
+.pie-enlaces{
+    margin-left:28px;
+    padding-left:24px;
+    border-left:1px solid rgba(57,169,0,.28);
+}
+.pie-enlaces-titulo{
+    margin:0 0 5px;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    color:#8a938e;
+}
+.pie-enlace{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:13.5px;
+    font-weight:600;
+    color:#39a900;
+    text-decoration:none;
+}
+.pie-enlace:hover{
+    color:#2d8600;
+    text-decoration:underline;
+}
+.pie-enlace i{ font-size:11px; }
+
+@media (max-width:768px){
+    .footer{ height:auto; padding:18px 24px; flex-wrap:wrap; gap:14px; }
+    .sena-logo{ font-size:44px; }
+    .pie-enlaces{ margin-left:0; padding-left:0; border-left:0; }
+}
+
+/* ══════════════════════════════════════════
+   MODAL DE VERIFICACIÓN — APRENDIZ
+══════════════════════════════════════════ */
+
+#modal-aprendiz .modal-content{
+    border:none;
+    border-radius:16px;
+    overflow:hidden;
+}
+
+#modal-aprendiz .modal-header{
+    background:#007832;
+    color:white;
+}
+
+#modal-aprendiz .modal-title{
+    font-weight:bold;
+    letter-spacing:.5px;
+    font-size:16px;
+}
+
+.campo-label{
+    font-size:13px;
+    font-weight:bold;
+    color:#444;
+    margin-bottom:8px;
+}
+
+/* ── Señal de campo faltante ── */
+
+.campo-invalido{
+    border-radius:8px;
+    outline:2px solid #c62828;
+    outline-offset:3px;
+    animation:campo-sacudir .3s ease;
+}
+
+@keyframes campo-sacudir{
+    0%,100%{ transform:translateX(0); }
+    25%    { transform:translateX(-5px); }
+    75%    { transform:translateX(5px); }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "lms-sena",
+  "version": "1.0.0",
+  "description": "SENAEnglish — evaluación interactiva de inglés (IF, THEN, USED TO, INFINITIVE) en tiempo real con Node.js, Express y Socket.IO.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "node server/server.js",
+    "dev:game": "node game-server/index.js",
+    "test": "node pruebas/test-senaenglish.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/construmaster100/AVAsena.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/construmaster100/AVAsena/issues"
+  },
+  "homepage": "https://github.com/construmaster100/AVAsena#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.9.2",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1",
+    "socket.io-client": "^4.8.3"
+  }
+}
