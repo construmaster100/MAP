@@ -11,6 +11,19 @@ concepto fue retirado por completo — código, estilos e imágenes — según
 [`docs/SENAEnglish_Documento_Requisitos.docx`](docs/SENAEnglish_Documento_Requisitos.docx),
 que es la fuente de requisitos vigente para este repositorio.
 
+## Despliegue
+
+| | |
+| --- | --- |
+| Carpeta local | `D:\FT3P` |
+| GitHub | [construmaster100/MAP](https://github.com/construmaster100/MAP), branch `main` |
+| Render (en vivo) | https://englishcoding.onrender.com |
+
+Este repositorio es independiente de `construmaster100/AVAsoft` (carpeta local
+`D:\cancha interactiva asincronica`, servicio Render `ADSOAVAsoft`) — son dos
+proyectos separados que por coincidencia recibieron una implementación similar
+de SENAEnglish; no comparten historial ni despliegue.
+
 ## Cómo correrlo
 
 ```
