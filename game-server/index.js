@@ -1,3 +1,4 @@
+require("dotenv").config();
 const path = require("path");
 const express = require("express");
 const { createServer } = require("http");
@@ -111,6 +112,8 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`SENAEnglish escuchando en http://localhost:${PORT}`);
+estado.cargarDesdeMongo().finally(() => {
+  server.listen(PORT, () => {
+    console.log(`SENAEnglish escuchando en http://localhost:${PORT}`);
+  });
 });

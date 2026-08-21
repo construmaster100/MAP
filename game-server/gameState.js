@@ -1,5 +1,7 @@
 const crypto = require("crypto");
 const { PREGUNTAS, sanitizarPregunta, TOTAL_PREGUNTAS } = require("./questions");
+const { conectarMongo } = require("./db");
+const Participante = require("./models/Participante");
 
 const RANKING_VISIBLE = 20;
 const MS_ANTES_DE_LIBERAR_COLOR = 8000;
@@ -22,6 +24,64 @@ class EvaluationState {
   constructor() {
     this.participantes = new Map(); // participanteId -> participante
     this.timersDesconexion = new Map(); // participanteId -> Timeout
+    this.persistenciaActiva = false;
+  }
+
+  // Restaura participantes guardados en MongoDB (si hay MONGODB_URI y Atlas
+  // responde) para que el ranking sobreviva a un reinicio del proceso (por
+  // ejemplo el spin-down de Render por inactividad). Si no hay persistencia
+  // disponible, el servidor sigue funcionando solo en memoria (RNF-17).
+  async cargarDesdeMongo() {
+    this.persistenciaActiva = await conectarMongo();
+    if (!this.persistenciaActiva) return;
+
+    const docs = await Participante.find({}).lean();
+    for (const doc of docs) {
+      this.participantes.set(doc.id, {
+        id: doc.id,
+        nombre: doc.nombre,
+        color: doc.color,
+        preguntaActual: doc.preguntaActual,
+        respuestas: doc.respuestas || [],
+        aciertos: doc.aciertos,
+        desaciertos: doc.desaciertos,
+        score: doc.score,
+        finalizado: doc.finalizado,
+        finalizadoEn: doc.finalizadoEn,
+        conectado: false,
+        socketId: null,
+        ultimaAccion: Date.now(),
+      });
+    }
+    console.log(`SENAEnglish: ${docs.length} participante(s) restaurado(s) desde MongoDB.`);
+  }
+
+  // Guarda el estado actual de un participante en MongoDB. Se llama "fire
+  // and forget" (sin await) desde unirse()/responder(): la respuesta al
+  // socket no debe esperar a Atlas (RNF-13), y un fallo de persistencia no
+  // debe romper la partida en curso.
+  async _guardarParticipante(participante) {
+    if (!this.persistenciaActiva) return;
+    try {
+      await Participante.findOneAndUpdate(
+        { id: participante.id },
+        {
+          id: participante.id,
+          nombre: participante.nombre,
+          color: participante.color,
+          preguntaActual: participante.preguntaActual,
+          respuestas: participante.respuestas,
+          aciertos: participante.aciertos,
+          desaciertos: participante.desaciertos,
+          score: participante.score,
+          finalizado: participante.finalizado,
+          finalizadoEn: participante.finalizadoEn,
+        },
+        { upsert: true }
+      );
+    } catch (err) {
+      console.error("SENAEnglish: error guardando participante en MongoDB:", err.message);
+    }
   }
 
   colorEnUso(colorId, excluirId) {
@@ -97,6 +157,7 @@ class EvaluationState {
       ultimaAccion: Date.now(),
     };
     this.participantes.set(participante.id, participante);
+    this._guardarParticipante(participante);
     return { ok: true, participante, esNuevo: true };
   }
 
@@ -142,6 +203,8 @@ class EvaluationState {
       participante.finalizadoEn = Date.now();
     }
 
+    this._guardarParticipante(participante);
+
     return {
       ok: true,
       participante,
@@ -180,6 +243,12 @@ class EvaluationState {
       p.score = 0;
       p.finalizado = false;
       p.finalizadoEn = null;
+    }
+    if (this.persistenciaActiva) {
+      Participante.updateMany(
+        {},
+        { preguntaActual: 0, respuestas: [], aciertos: 0, desaciertos: 0, score: 0, finalizado: false, finalizadoEn: null }
+      ).catch((err) => console.error("SENAEnglish: error reiniciando participantes en MongoDB:", err.message));
     }
   }
 }
