@@ -7,8 +7,8 @@
     "doc": "docs"
   },
   "scripts": {
-    "start": "node server/server.js",
-    "dev:game": "node game-server/index.js",
+    "start": "node game-server/index.js",
+    "start:adso": "node server/server.js",
     "test": "node pruebas/test-senaenglish.js"
   },
   "repository": {
